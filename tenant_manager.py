@@ -10,36 +10,40 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 
+# TESTING MODE: ALL LIMITS DISABLED
+# Set to False for production
+TESTING_MODE = True
+
 # Pricing plans
 PLANS = {
     "free": {
-        "monthly_tokens": 10000,
-        "max_agents": 1,
-        "max_workspace_mb": 100,
+        "monthly_tokens": -1 if TESTING_MODE else 10000,  # Unlimited in testing
+        "max_agents": -1 if TESTING_MODE else 1,
+        "max_workspace_mb": -1 if TESTING_MODE else 100,
         "price_monthly": 0,
-        "allowed_agents": ["basic"],
-        "allowed_sub_agents": ["searcher"]
+        "allowed_agents": ["all"],
+        "allowed_sub_agents": ["all"]
     },
     "starter": {
-        "monthly_tokens": 100000,
-        "max_agents": 3,
-        "max_workspace_mb": 500,
+        "monthly_tokens": -1 if TESTING_MODE else 100000,  # Unlimited in testing
+        "max_agents": -1 if TESTING_MODE else 3,
+        "max_workspace_mb": -1 if TESTING_MODE else 500,
         "price_monthly": 29,
-        "allowed_agents": ["sales", "support", "research"],
-        "allowed_sub_agents": ["lead_scorer", "email_writer", "response_generator", "searcher", "summarizer"]
+        "allowed_agents": ["all"],
+        "allowed_sub_agents": ["all"]
     },
     "pro": {
-        "monthly_tokens": 500000,
-        "max_agents": 10,
-        "max_workspace_mb": 5000,
+        "monthly_tokens": -1 if TESTING_MODE else 500000,  # Unlimited in testing
+        "max_agents": -1 if TESTING_MODE else 10,
+        "max_workspace_mb": -1 if TESTING_MODE else 5000,
         "price_monthly": 99,
         "allowed_agents": ["all"],
         "allowed_sub_agents": ["all"]
     },
     "enterprise": {
-        "monthly_tokens": -1,  # unlimited
+        "monthly_tokens": -1,  # always unlimited
         "max_agents": -1,
-        "max_workspace_mb": 50000,
+        "max_workspace_mb": -1,
         "price_monthly": 499,
         "allowed_agents": ["all"],
         "allowed_sub_agents": ["all"],

@@ -2,12 +2,17 @@
 """
 Usage Tracker - Track AI token usage per tenant
 Monitor costs, enforce limits, generate reports
+
+TESTING MODE: All limits disabled for unlimited testing
 """
 
 import sqlite3
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 import json
+
+# TESTING MODE: Set to False for production
+TESTING_MODE = True
 
 class UsageTracker:
     def __init__(self, db_path="./usage.db"):
@@ -279,19 +284,23 @@ class UsageTracker:
         } for row in rows]
     
     # ==================== ALERTS ====================
-    
+
     def _check_usage_alerts(self, tenant_id: str, limit: int = None):
         """Check if usage exceeds thresholds and create alerts"""
+        # DISABLED IN TESTING MODE
+        if TESTING_MODE:
+            return
+        
         if limit is None:
             # Would need to get from tenant config
             return
-        
+
         monthly_usage = self.get_monthly_usage(tenant_id)
         usage_percent = (monthly_usage / limit * 100) if limit > 0 else 0
-        
+
         # Check thresholds
         thresholds = [80, 90, 100]
-        
+
         for threshold in thresholds:
             if usage_percent >= threshold:
                 # Check if alert already exists
@@ -300,14 +309,14 @@ class UsageTracker:
                     WHERE tenant_id = ? AND alert_type = 'usage_threshold'
                     AND threshold_percent = ? AND is_resolved = FALSE
                 """, (tenant_id, threshold)).fetchone()
-                
+
                 if not existing:
                     self.db.execute("""
-                        INSERT INTO alerts 
+                        INSERT INTO alerts
                         (tenant_id, alert_type, message, threshold_percent)
-                        VALUES (?, 'usage_threshold', 
+                        VALUES (?, 'usage_threshold',
                                ?, ?)
-                    """, (tenant_id, 
+                    """, (tenant_id,
                           f"Usage exceeded {threshold}% of monthly limit",
                           threshold))
                     self.db.commit()
