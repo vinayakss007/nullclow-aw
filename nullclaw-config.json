@@ -1,0 +1,48 @@
+{
+  "models": {
+    "providers": {
+      "openrouter": {
+        "api_key": "YOUR_OPENROUTER_API_KEY"
+      }
+    }
+  },
+
+  "channels": {
+    "telegram": {
+      "accounts": {
+        "main": {
+          "bot_token": "YOUR_TELEGRAM_BOT_TOKEN",
+          "allow_from": ["your_telegram_username"],
+          "reply_in_private": true
+        }
+      }
+    }
+  },
+
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "openrouter/google/gemini-2.0-flash-exp:free"
+      }
+    },
+    "list": [
+      {
+        "id": "telegram-search-agent",
+        "name": "Search Agent",
+        "system_prompt": "You are a helpful assistant with internet search capabilities. When users ask about current events, news, or need information, use the browser tool to search the web. Keep responses concise and helpful.",
+        "tools": ["browser", "http_request"],
+        "channels": ["telegram:main"]
+      }
+    ]
+  },
+
+  "memory": {
+    "backend": "sqlite",
+    "auto_save": true
+  },
+
+  "autonomy": {
+    "level": "supervised",
+    "workspace_only": true
+  }
+}
