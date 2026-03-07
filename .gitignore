@@ -1,1 +1,39 @@
-node_modules
+# API Keys - NEVER COMMIT
+.env
+.env.local
+.env.production
+*.key
+secrets.json
+config.json
+
+# Customer Data - NEVER COMMIT
+customers/
+tenant_*/
+*.db
+*.sqlite
+
+# Logs
+logs/
+*.log
+nullclaw.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# System
+.DS_Store
+Thumbs.db
