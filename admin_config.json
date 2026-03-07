@@ -1,0 +1,8 @@
+{
+  "admin_email": "admin@example.com",
+  "platform_name": "Multi-Agent Platform",
+  "testing_mode": true,
+  "maintenance_mode": false,
+  "max_tenants_per_account": 10,
+  "auto_approve_tenants": true
+}
