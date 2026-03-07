@@ -1,6 +1,6 @@
 # AI Agents Platform (Nullclaw-based)
 
-🤖 **Multi-tenant AI Agents Platform for businesses** - Built on [Nullclaw](https://github.com/nullclaw/nullclaw)
+🤖 **Multi-tenant AI Agents Platform with Task Assignment & Sub-Agents** - Built on [Nullclaw](https://github.com/nullclaw/nullclaw)
 
 ---
 
@@ -15,32 +15,33 @@ cd nullclow-aw
 curl -L https://github.com/nullclaw/nullclaw/releases/latest/download/nullclaw-linux-x86_64.bin -o nullclaw
 chmod +x nullclaw && sudo mv nullclaw /usr/local/bin/
 
-# Configure
-nullclaw onboard --api-key YOUR_OPENROUTER_KEY --provider openrouter
+# Create first customer
+python3 tenant_manager.py create "Acme Corp" pro
 
-# Start Telegram bot
-nullclaw channel start telegram
+# Route a task
+python3 agents_platform.py route tenant_001 "Score this sales lead: Budget $10k, Timeline 1 month"
+
+# Check usage
+python3 usage_tracker.py report tenant_001
 ```
 
 ---
 
 ## 📦 Features
 
-### Pre-built Agents
-- ✅ **Sales Lead Agent** - Score and qualify leads automatically
-- ✅ **HR Screening Agent** - Screen resumes and rank candidates
-- ✅ **Support Agent** - Handle customer support tickets
-- ✅ **Office Assistant** - General office tasks and scheduling
+### ✅ Multi-Agent System
+- **6 Pre-built Agents**: Sales, HR, Support, Research, Content, Office
+- **18 Sub-Agents**: Specialized task handlers (lead_scorer, resume_screener, etc.)
+- **Task Router**: Automatically assigns tasks to correct agent/sub-agent
+- **Task Tracking**: Full task lifecycle management
 
-### Platform Features
-- 🌐 Internet search via browser & HTTP requests
-- 🧠 Long-term memory per customer
-- 📁 File operations (read/write/edit)
-- 💻 Shell command execution
-- 📊 Usage tracking per tenant
-- 🔒 Isolated workspaces per customer
+### ✅ Multi-Tenant Platform
+- **Isolated Workspaces**: Each customer gets separate data & memory
+- **Usage Tracking**: Token usage per tenant with alerts
+- **Pricing Tiers**: Free, Starter, Pro, Enterprise
+- **Monthly Limits**: Automatic enforcement
 
-### Tools Available
+### ✅ Tools Available
 | Tool | Description |
 |------|-------------|
 | `browser` | Web search and browsing |
@@ -48,77 +49,147 @@ nullclaw channel start telegram
 | `file_read/write/edit` | File operations |
 | `memory_store/recall/forget` | Memory management |
 | `shell` | Execute commands |
-| `git` | Git operations |
 | `schedule` | Schedule tasks |
-
----
-
-## 💰 Pricing Tiers
-
-| Plan | Price | Tokens/Month | Agents | Workspace |
-|------|-------|--------------|--------|-----------|
-| **Free** | $0 | 10K | 1 | 100 MB |
-| **Starter** | $29/mo | 100K | 3 | 500 MB |
-| **Pro** | $99/mo | 500K | 10 | 5 GB |
-| **Enterprise** | $499/mo | Unlimited | All | 50 GB |
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────┐
-│         Your VPS Server             │
-│  ┌──────────────────────────────┐  │
-│  │   Nullclaw (3.3 MB binary)   │  │
-│  └──────────────────────────────┘  │
-│  ┌──────────────────────────────┐  │
-│  │   Platform Code (this repo)  │  │
-│  └──────────────────────────────┘  │
-│  ┌──────────────────────────────┐  │
-│  │   /customers/                │  │
-│  │   ├── tenant_001/ (isolated) │  │
-│  │   ├── tenant_002/ (isolated) │  │
-│  │   └── tenant_003/ (isolated) │  │
-│  └──────────────────────────────┘  │
-└─────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────┐
-│   OpenRouter API        │
-│   (AI Models)           │
-└─────────────────────────┘
+┌─────────────────────────────────────────────────┐
+│              Telegram / API Gateway             │
+└────────────────────┬────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────┐
+│              Agent Router                        │
+│  (Routes tasks to correct agent/sub-agent)      │
+└─────┬──────────────┬──────────────┬─────────────┘
+      │              │              │
+      ▼              ▼              ▼
+┌──────────┐  ┌──────────┐  ┌──────────┐
+│  Sales   │  │    HR    │  │ Support  │  ← Main Agents
+│  Agent   │  │  Agent   │  │  Agent   │
+└────┬─────┘  └────┬─────┘  └────┬─────┘
+     │             │             │
+     ▼             ▼             ▼
+┌─────────┐  ┌──────────┐ ┌───────────┐
+│ lead_   │  │ resume_  │ │ response_ │  ← Sub-Agents
+│ scorer  │  │ screener │ │ generator │
+│ email_  │  │ question │ │ ticket_   │
+│ writer  │  │ generator│ │ classifier│
+└─────────┘  └──────────┘ └───────────┘
+
+┌─────────────────────────────────────────────────┐
+│           Tenant Management Layer               │
+│  - Isolated workspaces per customer            │
+│  - Usage tracking & limits                     │
+│  - Billing & plans                             │
+└─────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📁 Project Structure
+## 🤖 Available Agents
 
+### 1. Sales Lead Agent
+**Purpose**: Score and qualify sales leads automatically
+
+**Sub-Agents**:
+- `lead_scorer` - Score leads 0-100
+- `email_writer` - Generate outreach emails
+- `crm_updater` - Format data for CRM
+
+**Example**:
+```bash
+python3 agents_platform.py route tenant_001 "Score this lead: Budget $50k, decision maker ready"
 ```
-nullclow-aw/
-├── README.md                 # This file
-├── CONFIG_GUIDE.md           # Detailed setup guide
-├── PLATFORM_STRATEGY.md      # Business strategy
-├── TELEGRAM_COMMANDS.md      # Bot commands guide
-├── .gitignore               # Git ignore rules
-├── .env.example             # Environment template
-│
-├── agents/                   # Agent definitions
-│   ├── sales_agent/
-│   ├── hr_agent/
-│   └── support_agent/
-│
-├── platform/                 # Platform code
-│   ├── tenant_manager.py    # Create/manage customers
-│   └── usage_tracker.py     # Track AI usage
-│
-├── deployment/               # Deployment configs
-│   ├── docker-compose.yml
-│   └── scripts/
-│
-└── docs/                     # Documentation
-    └── setup.md
+
+---
+
+### 2. HR Screening Agent
+**Purpose**: Screen resumes and rank candidates
+
+**Sub-Agents**:
+- `resume_screener` - Match resumes to job descriptions
+- `question_generator` - Create interview questions
+- `ranker` - Rank all candidates
+
+**Example**:
+```bash
+python3 agents_platform.py route tenant_001 "Screen this resume for Python Developer role"
 ```
+
+---
+
+### 3. Support Agent
+**Purpose**: Handle customer support tickets
+
+**Sub-Agents**:
+- `ticket_classifier` - Categorize and prioritize
+- `response_generator` - Draft support responses
+- `escalation_handler` - Flag urgent issues
+
+**Example**:
+```bash
+python3 agents_platform.py route tenant_001 "Customer can't login, getting error 500"
+```
+
+---
+
+### 4. Research Agent
+**Purpose**: Research topics and summarize findings
+
+**Sub-Agents**:
+- `searcher` - Web search
+- `summarizer` - Create summaries
+- `citation_manager` - Track sources
+
+**Example**:
+```bash
+python3 agents_platform.py route tenant_001 "Research latest AI trends in healthcare"
+```
+
+---
+
+### 5. Content Agent
+**Purpose**: Create content (blogs, social media, SEO)
+
+**Sub-Agents**:
+- `seo_analyzer` - Generate SEO keywords
+- `blog_writer` - Write blog posts
+- `social_media_manager` - Create social posts
+
+**Example**:
+```bash
+python3 agents_platform.py route tenant_001 "Write blog post about remote work tools"
+```
+
+---
+
+### 6. Office Assistant Agent
+**Purpose**: General office tasks and scheduling
+
+**Sub-Agents**:
+- `scheduler` - Schedule meetings
+- `note_taker` - Organize notes
+- `reminder_manager` - Set reminders
+
+**Example**:
+```bash
+python3 agents_platform.py route tenant_001 "Schedule team meeting for Friday 2pm"
+```
+
+---
+
+## 💰 Pricing Tiers
+
+| Plan | Price | Tokens/Month | Agents | Sub-Agents | Workspace |
+|------|-------|--------------|--------|------------|-----------|
+| **Free** | $0 | 10K | 1 | 1 | 100 MB |
+| **Starter** | $29/mo | 100K | 3 | 5 | 500 MB |
+| **Pro** | $99/mo | 500K | 10 | All | 5 GB |
+| **Enterprise** | $499/mo | Unlimited | All | All | 50 GB |
 
 ---
 
@@ -132,7 +203,7 @@ nullclow-aw/
 3. Create API key
 4. Copy key (starts with `sk-or-v1-`)
 
-**Telegram Bot:**
+**Telegram Bot (per customer):**
 1. Open Telegram
 2. Message `@BotFather`
 3. Send `/newbot`
@@ -156,73 +227,85 @@ chmod +x nullclaw && sudo mv nullclaw /usr/local/bin/
 nullclaw version
 ```
 
-### 3. Configure
+### 3. Clone & Setup
 
 ```bash
 # Clone repo
 git clone https://github.com/coding4vinayak/nullclow-aw.git
 cd nullclow-aw
 
-# Initialize Nullclaw
-nullclaw onboard --api-key sk-or-v1-YOUR_KEY --provider openrouter
+# Create first customer
+python3 tenant_manager.py create "Acme Corp" pro "acme@example.com" "TELEGRAM_BOT_TOKEN"
 
-# Add Telegram to config
-nano ~/.nullclaw/config.json
-# Add Telegram config (see CONFIG_GUIDE.md)
-```
+# Route a task
+python3 agents_platform.py route tenant_001 "Search for AI news"
 
-### 4. Create First Customer
-
-```bash
-cd nullclow-aw
-python3 platform/tenant_manager.py create "Acme Corp" pro
-```
-
-### 5. Start Bot
-
-```bash
-nohup nullclaw channel start telegram > /var/log/nullclaw.log 2>&1 &
-
-# Check status
-nullclaw status
+# Check usage
+python3 usage_tracker.py report tenant_001
 ```
 
 ---
 
-## 📱 Telegram Bot Commands
+## 📱 Usage Examples
 
-### General
-```
-/start - Start the bot
-/help - Show help
-/status - Show system status
-```
+### Create Customer
+```bash
+# Free tier
+python3 tenant_manager.py create "Test Company" free
 
-### Search
-```
-Search for [topic]
-Browse [URL]
-Get [API URL]
+# Starter tier with Telegram
+python3 tenant_manager.py create "Acme Corp" starter "acme@example.com" "123456:ABC-DEF1234ghIkl"
+
+# Enterprise
+python3 tenant_manager.py create "Big Corp" enterprise "contact@bigcorp.com"
 ```
 
-### Memory
-```
-Remember [information]
-What do you remember about me?
-Forget [topic]
+### Route Tasks
+```bash
+# Sales
+python3 agents_platform.py route tenant_001 "Score this lead: Budget $10k, timeline 2 weeks"
+
+# HR
+python3 agents_platform.py route tenant_001 "Screen resume for Developer position"
+
+# Research
+python3 agents_platform.py route tenant_001 "Find trending topics in AI"
+
+# Content
+python3 agents_platform.py route tenant_001 "Generate SEO keywords for bakery website"
 ```
 
-### Files
-```
-Create [file] with: [content]
-Read [file]
-Edit [file]: change [old] to [new]
+### Track Usage
+```bash
+# Record usage
+python3 usage_tracker.py record tenant_001 1500 llama-3.3 sales_agent
+
+# Check monthly usage
+python3 usage_tracker.py monthly tenant_001
+
+# Generate report
+python3 usage_tracker.py report tenant_001
+
+# View alerts
+python3 usage_tracker.py alerts
 ```
 
-### Shell
-```
-Run: [command]
-Execute: [command]
+### Manage Tenants
+```bash
+# List all
+python3 tenant_manager.py list
+
+# Get details
+python3 tenant_manager.py get tenant_001
+
+# Update plan
+python3 tenant_manager.py update tenant_001 plan pro
+
+# Usage report
+python3 tenant_manager.py usage
+
+# Reset monthly (run on 1st)
+python3 tenant_manager.py reset-usage
 ```
 
 ---
@@ -232,23 +315,53 @@ Execute: [command]
 - ✅ Workspace isolation per tenant
 - ✅ API key encryption
 - ✅ Rate limiting per customer
-- ✅ Usage tracking and limits
+- ✅ Usage tracking and alerts
 - ✅ Directory traversal protection
+- ✅ .env never committed to Git
 
 ---
 
 ## 📊 Monitoring
 
 ```bash
-# Check usage
-python3 platform/usage_tracker.py
+# Tenant usage
+python3 tenant_manager.py usage
 
-# View logs
-tail -f /var/log/nullclaw.log
+# All usage
+python3 usage_tracker.py report
 
-# Check status
-nullclaw status
-nullclaw channel status
+# Alerts
+python3 usage_tracker.py alerts
+
+# Task history
+python3 agents_platform.py tasks tenant_001
+```
+
+---
+
+## 🔄 Task Flow Example
+
+```
+User: "Score this sales lead and write email"
+  │
+  ▼
+Agent Router
+  │
+  ├─→ lead_scorer (sub-agent)
+  │     └─→ Score: 85/100
+  │
+  └─→ email_writer (sub-agent)
+        └─→ Draft email generated
+  
+  ▼
+Task Manager
+  │
+  ├─→ Record task
+  ├─→ Track tokens
+  └─→ Store result
+  
+  ▼
+Response to User
 ```
 
 ---
@@ -258,7 +371,7 @@ nullclaw channel status
 ### Bot doesn't respond
 ```bash
 # Check logs
-cat /var/log/nullclaw.log
+tail -f /var/log/nullclaw.log
 
 # Restart
 pkill nullclaw
@@ -277,17 +390,26 @@ nullclaw doctor
 nullclaw status
 ```
 
+### Database issues
+```bash
+# Reset usage tracker
+rm usage.db
+python3 usage_tracker.py  # Recreates tables
+```
+
 ---
 
 ## 📈 Roadmap
 
-- [x] Basic Telegram bot
-- [x] Internet search capability
+- [x] Multi-agent system with sub-agents
+- [x] Task routing and assignment
 - [x] Multi-tenant support
+- [x] Usage tracking
 - [ ] Web dashboard
 - [ ] Stripe billing integration
-- [ ] More pre-built agents
+- [ ] Custom agent builder
 - [ ] Analytics dashboard
+- [ ] API for third-party integrations
 
 ---
 
@@ -319,7 +441,7 @@ MIT License - see LICENSE file for details
 
 For issues and questions:
 - Create an issue on GitHub
-- Contact: [your-email@example.com]
+- Contact: vinayak@example.com
 
 ---
 
