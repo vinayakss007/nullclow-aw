@@ -1,17 +1,21 @@
 {
-  "name": "nodejs-sandbox",
+  "name": "nullclaw-ai-platform",
   "version": "1.0.0",
-  "description": "",
+  "description": "NullClaw AI Multi-Agent Platform - Telegram Bot + OpenRouter AI + Web Search",
   "main": "index.js",
   "scripts": {
-    "start": "node --watch index.js"
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "search": "node search.js"
   },
-  "keywords": [],
-  "author": "Ives van Hoorne",
+  "keywords": ["ai", "telegram", "bot", "agents", "openrouter", "multi-agent"],
+  "author": "NullClaw",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.13.6",
     "cheerio": "^1.2.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
     "node-telegram-bot-api": "^0.67.0"
   }
 }
